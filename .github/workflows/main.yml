@@ -42,14 +42,14 @@ jobs:
 
       - name: Update Helm values.yaml
         run: |
-          sed -i 's/tag:.*/tag: \"${{ github.sha }}\"/' helm-chart/myapp/values.yaml
+          sed -i 's/tag:.*/tag: \"${{ github.sha }}\"/' helm-chart/values.yaml
 
       - name: Commit Updated Helm Chart
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
 
-          git add helm/myapp/values.yaml
+          git add helm-chart/values.yaml
           git commit -m "Updated image tag"
 
           git push
