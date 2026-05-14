@@ -1,0 +1,55 @@
+name: Build and Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::731330499337:role/GitHubActionsEKSRole
+          aws-region: ap-south-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker Image
+        run: |
+          docker build -t eks-node-app:${{ github.sha }} ./app
+
+      - name: Tag Docker Image
+        run: |
+          docker tag eks-node-app:${{ github.sha }} \
+          731330499337.dkr.ecr.ap-south-1.amazonaws.com/eks-node-app:${{ github.sha }}
+
+      - name: Push Docker Image
+        run: |
+          docker push 731330499337.dkr.ecr.ap-south-1.amazonaws.com/eks-node-app:${{ github.sha }}
+
+      - name: Update Helm values.yaml
+        run: |
+          sed -i 's/tag:.*/tag: \"${{ github.sha }}\"/' helm/myapp/values.yaml
+
+      - name: Commit Updated Helm Chart
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+
+          git add helm/myapp/values.yaml
+          git commit -m "Updated image tag"
+
+          git push
