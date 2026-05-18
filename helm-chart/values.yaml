@@ -2,7 +2,7 @@ replicaCount: 0
 
 image:
   repository: 731330499337.dkr.ecr.ap-south-1.amazonaws.com/eks-node-app
-  tag: "70e017de468ee13992a1e7289d8adb4cf77e28aa"
+  tag: "ff2041f7d24f4c687a23fe1da4709b7475f8347b"
   pullPolicy: Always
 
 service:
